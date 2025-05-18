@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathCo. Servers</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f5f9fc;
+            margin: 0;
+            padding: 15px;
+            color: #333;
+            display: flex;
+        }
+        .network-status {
+            width: 200px;
+            background: #fff;
+            padding: 15px;
+            margin-right: 20px;
+            border-radius: 5px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+        }
+        .network-status h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .network-info {
+            font-size: 0.85rem;
+        }
+        .network-ip {
+            font-family: monospace;
+            margin: 5px 0;
+            padding: 3px;
+            background: #f8f9fa;
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+        .office-network {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .non-office-network {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 1000px;
+            flex: 1;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        header p {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0;
+        }
+        .protocol-section {
+            margin-bottom: 25px;
+        }
+        .protocol-title {
+            font-size: 1.1rem;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        .protocol-title i {
+            margin-right: 8px;
+            font-size: 0.9rem;
+        }
+        .server-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+        .server-card {
+            background: white;
+            border-radius: 5px;
+            padding: 12px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+            text-align: left;
+            position: relative;
+        }
+        .server-name-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            padding-right: 20px;
+        }
+        .server-name {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-right: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .status-container {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+            font-size: 0.7rem;
+            white-space: nowrap;
+        }
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+        .status-available {
+            background-color: #28a745;
+        }
+        .status-unavailable {
+            background-color: #dc3545;
+        }
+        .status-checking {
+            background-color: #ffc107;
+        }
+        .server-ip {
+            font-family: monospace;
+            font-size: 0.8rem;
+            background: #f8f9fa;
+            padding: 3px;
+            border-radius: 2px;
+            display: inline-block;
+        }
+        .server-owner {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 3px;
+        }
+        .connect-btn {
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            font-weight: bold;
+            font-size: 0.8rem;
+            transition: background 0.2s;
+        }
+        .rdp-btn {
+            background: #0078d7;
+        }
+        .rdp-btn:hover {
+            background: #005fa3;
+        }
+        .ssh-btn {
+            background: #28a745;
+        }
+        .ssh-btn:hover {
+            background: #218838;
+        }
+        .http-btn {
+            background: #6f42c1;
+        }
+        .http-btn:hover {
+            background: #5a32a3;
+        }
+        .refresh-icon {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            color: #6c757d;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: transform 0.3s;
+        }
+        .refresh-icon:hover {
+            color: #495057;
+            transform: rotate(180deg);
+        }
+        .last-checked {
+            font-size: 0.6rem;
+            color: #666;
+            margin-top: 5px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="network-status">
+        <h3>Network Status</h3>
+        <div class="network-info" id="network-status">
+            Checking network...
+        </div>
+        <div id="current-ip" class="network-ip"></div>
+        <div id="office-ips" style="margin-top: 15px;">
+            <strong>Office Networks:</strong>
+            <div class="network-ip">14.142.183.126 - Tata</div>
+            <div class="network-ip">125.21.77.222 - Airtel</div>
+            <div class="network-ip">49.204.94.93 - ACT</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h3><i class="fas fa-server"></i> MathCo. Servers</h3>
+            <p>IT Admin Panel</p>
+        </header>
+		
+
+
+        <!-- RDP Servers Section -->
+        <div class="protocol-section rdp-section">
+            <h2 class="protocol-title"><i class="fas fa-desktop"></i> Remote Desktop (RDP) Servers</h2>
+            <div class="server-grid">
+                <div class="server-card">
+                    <i class="fas fa-sync-alt refresh-icon" onclick="checkServerStatus('10.101.104.10', 'rdp', 'RDP')"></i>
+                    <div class="server-name-container">
+                        <div class="server-name">ACS_Server</div>
+                        <div class="status-container">
+                            <div class="status-indicator status-checking" id="icmp-10.101.104.10"></div>
+                            <span>ICMP</span>
+                            <div class="status-indicator status-checking" id="port-10.101.104.10-rdp" style="margin-left: 5px;"></div>
+                            <span>RDP</span>
+                        </div>
+                    </div>
+                    <div class="server-ip">10.101.104.10</div>
+                    <div class="server-owner">Owner: Vignesh B</div>
+                    <div class="last-checked" id="last-checked-10.101.104.10"></div>
+                    <button class="connect-btn rdp-btn" onclick="connectRDP('10.101.104.10')">
+                        <i class="fas fa-desktop"></i> Connect via RDP
+                    </button>
+                </div>
+                
+                <div class="server-card">
+                    <i class="fas fa-sync-alt refresh-icon" onclick="checkServerStatus('10.101.10.11', 'rdp', 'RDP')"></i>
+                    <div class="server-name-container">
+                        <div class="server-name">Reserva_Server</div>
+                        <div class="status-container">
+                            <div class="status-indicator status-checking" id="icmp-10.101.10.11"></div>
+                            <span>ICMP</span>
+                            <div class="status-indicator status-checking" id="port-10.101.10.11-rdp" style="margin-left: 5px;"></div>
+                            <span>RDP</span>
+                        </div>
+                    </div>
+                    <div class="server-ip">10.101.10.11</div>
+                    <div class="server-owner">Owner: Naveen R</div>
+                    <div class="last-checked" id="last-checked-10.101.10.11"></div>
+                    <button class="connect-btn rdp-btn" onclick="connectRDP('10.101.10.11')">
+                        <i class="fas fa-desktop"></i> Connect via RDP
+                    </button>
+                </div>
+				
+				<div class="server-card">
+                    <i class="fas fa-sync-alt refresh-icon" onclick="checkServerStatus('10.101.101.25', 'rdp', 'RDP')"></i>
+                    <div class="server-name-container">
+                        <div class="server-name">File_Server</div>
+                        <div class="status-container">
+                            <div class="status-indicator status-checking" id="icmp-10.101.101.25"></div>
+                            <span>ICMP</span>
+                            <div class="status-indicator status-checking" id="port-10.101.101.25-rdp" style="margin-left: 5px;"></div>
+                            <span>RDP</span>
+                        </div>
+                    </div>
+                    <div class="server-ip">10.101.101.25</div>
+                    <div class="server-owner">Owner: Vignesh B</div>
+                    <div class="last-checked" id="last-checked-10.101.101.25"></div>
+                    <button class="connect-btn rdp-btn" onclick="connectRDP('10.101.101.25')">
+                        <i class="fas fa-desktop"></i> Connect via RDP
+                    </button>
+                </div>
+                
+                <div class="server-card">
+                    <i class="fas fa-sync-alt refresh-icon" onclick="checkServerStatus('10.20.20.4', 'rdp', 'RDP')"></i>
+                    <div class="server-name-container">
+                        <div class="server-name">DLP_Server</div>
+                        <div class="status-container">
+                            <div class="status-indicator status-checking" id="icmp-10.20.20.4"></div>
+                            <span>ICMP</span>
+                            <div class="status-indicator status-checking" id="port-10.20.20.4-rdp" style="margin-left: 5px;"></div>
+                            <span>RDP</span>
+                        </div>
+                    </div>
+                    <div class="server-ip">10.20.20.4</div>
+                    <div class="server-owner">Owner: Sabbarish S</div>
+                    <div class="last-checked" id="last-checked-10.20.20.4"></div>
+                    <button class="connect-btn rdp-btn" onclick="connectRDP('10.20.20.4')">
+                        <i class="fas fa-desktop"></i> Connect via RDP
+                    </button>
+                </div>
+            </div>
+        </div>
+		
+	
+        <!-- SSH Servers Section -->
+        <div class="protocol-section ssh-section">
+            <h2 class="protocol-title"><i class="fas fa-terminal"></i> SSH Servers</h2>
+            <div class="server-grid">
+                <div class="server-card">
+                    <i class="fas fa-sync-alt refresh-icon" onclick="checkServerStatus('10.101.10.1', 'ssh', 'SSH')"></i>
+                    <div class="server-name-container">
+                        <div class="server-name">Firewall</div>
+                        <div class="status-container">
+                            <div class="status-indicator status-checking" id="icmp-10.101.10.1"></div>
+                            <span>ICMP</span>
+                            <div class="status-indicator status-checking" id="port-10.101.10.1-ssh" style="margin-left: 5px;"></div>
+                            <span>SSH</span>
+                        </div>
+                    </div>
+                    <div class="server-ip">10.101.10.1</div>
+                    <div class="server-owner">Owner: Vignesh B</div>
+                    <div class="last-checked" id="last-checked-10.101.10.1"></div>
+                    <button class="connect-btn ssh-btn" onclick="connectSSH('10.101.10.1')">
+                        <i class="fas fa-terminal"></i> Connect via SSH
+                    </button>
+                </div>
+                
+                <div class="server-card">
+                    <i class="fas fa-sync-alt refresh-icon" onclick="checkServerStatus('10.101.10.10', 'ssh', 'SSH')"></i>
+                    <div class="server-name-container">
+                        <div class="server-name">WLC_Controller</div>
+                        <div class="status-container">
+                            <div class="status-indicator status-checking" id="icmp-10.101.10.10"></div>
+                            <span>ICMP</span>
+                            <div class="status-indicator status-checking" id="port-10.101.10.10-ssh" style="margin-left: 5px;"></div>
+                            <span>SSH</span>
+                        </div>
+                    </div>
+                    <div class="server-ip">10.101.10.10</div>
+                    <div class="server-owner">Owner: Vignesh B</div>
+                    <div class="last-checked" id="last-checked-10.101.10.10"></div>
+                    <button class="connect-btn ssh-btn" onclick="connectSSH('10.101.10.10')">
+                        <i class="fas fa-terminal"></i> Connect via SSH
+                    </button>
+                </div>
+                
+                <div class="server-card">
+                    <i class="fas fa-sync-alt refresh-icon" onclick="checkServerStatus('10.101.10.21', 'ssh', 'SSH')"></i>
+                    <div class="server-name-container">
+                        <div class="server-name">Core_SW_8F</div>
+                        <div class="status-container">
+                            <div class="status-indicator status-checking" id="icmp-10.101.10.21"></div>
+                            <span>ICMP</span>
+                            <div class="status-indicator status-checking" id="port-10.101.10.21-ssh" style="margin-left: 5px;"></div>
+                            <span>SSH</span>
+                        </div>
+                    </div>
+                    <div class="server-ip">10.101.10.21</div>
+                    <div class="server-owner">Owner: Vignesh B</div>
+                    <div class="last-checked" id="last-checked-10.101.10.21"></div>
+                    <button class="connect-btn ssh-btn" onclick="connectSSH('10.101.10.21')">
+                        <i class="fas fa-terminal"></i> Connect via SSH
+                    </button>
+                </div>
+                
+                <div class="server-card">
+                    <i class="fas fa-sync-alt refresh-icon" onclick="checkServerStatus('10.101.10.31', 'ssh', 'SSH')"></i>
+                    <div class="server-name-container">
+                        <div class="server-name">Core_SW_9F</div>
+                        <div class="status-container">
+                            <div class="status-indicator status-checking" id="icmp-10.101.10.31"></div>
+                            <span>ICMP</span>
+                            <div class="status-indicator status-checking" id="port-10.101.10.31-ssh" style="margin-left: 5px;"></div>
+                            <span>SSH</span>
+                        </div>
+                    </div>
+                    <div class="server-ip">10.101.10.31</div>
+                    <div class="server-owner">Owner: Vignesh B</div>
+                    <div class="last-checked" id="last-checked-10.101.10.31"></div>
+                    <button class="connect-btn ssh-btn" onclick="connectSSH('10.101.10.31')">
+                        <i class="fas fa-terminal"></i> Connect via SSH
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- HTTP Servers Section -->
+        <div class="protocol-section http-section">
+            <h2 class="protocol-title"><i class="fas fa-globe"></i> Web Interfaces</h2>
+            <div class="server-grid">
+                <div class="server-card">
+                    <i class="fas fa-sync-alt refresh-icon" onclick="checkWebServerStatus('blr1.mathco.com')"></i>
+                    <div class="server-name-container">
+                        <div class="server-name">Firewall</div>
+                        <div class="status-container">
+                            <div class="status-indicator status-checking" id="icmp-blr1.mathco.com"></div>
+                            <span>ICMP</span>
+                            <div class="status-indicator status-checking" id="port-blr1.mathco.com-https" style="margin-left: 5px;"></div>
+                            <span>HTTPS</span>
+                        </div>
+                    </div>
+                    <div class="server-ip">blr1.mathco.com</div>
+                    <div class="server-owner">Owner: Vignesh B</div>
+                    <div class="last-checked" id="last-checked-blr1.mathco.com"></div>
+                    <button class="connect-btn http-btn" onclick="tryFirewallConnection()">
+                        <i class="fas fa-globe"></i> Open in Browser
+                    </button>
+                </div>
+                
+                <div class="server-card">
+                    <i class="fas fa-sync-alt refresh-icon" onclick="checkServerStatus('10.101.10.10-web', 'https', 'HTTPS')"></i>
+                    <div class="server-name-container">
+                        <div class="server-name">WLC_Controller</div>
+                        <div class="status-container">
+                            <div class="status-indicator status-checking" id="icmp-10.101.10.10-web"></div>
+                            <span>ICMP</span>
+                            <div class="status-indicator status-checking" id="port-10.101.10.10-web-https" style="margin-left: 5px;"></div>
+                            <span>HTTPS</span>
+                        </div>
+                    </div>
+                    <div class="server-ip">10.101.10.10:4343</div>
+                    <div class="server-owner">Owner: Vignesh B</div>
+                    <div class="last-checked" id="last-checked-10.101.10.10-web"></div>
+                    <button class="connect-btn http-btn" onclick="connectHTTP('https://10.101.10.10:4343')">
+                        <i class="fas fa-globe"></i> Open in Browser
+                    </button>
+                </div>
+							
+				<div class="server-card">
+    <i class="fas fa-sync-alt refresh-icon" onclick="checkServerStatus('10.101.104.10-web', 'http', 'HTTP')"></i>
+    <div class="server-name-container">
+        <div class="server-name">MagicInfo</div>
+        <div class="status-container">
+            <div class="status-indicator status-checking" id="icmp-10.101.104.10-web"></div>
+            <span>ICMP</span>
+            <div class="status-indicator status-checking" id="port-10.101.104.10-web-http" style="margin-left: 5px;"></div>
+            <span>HTTP</span>
+        </div>
+    </div>
+    <div class="server-ip">10.101.104.10:7001</div>
+    <div class="server-owner">Owner: Vignesh B</div>
+    <div class="last-checked" id="last-checked-10.101.104.10-web"></div>
+    <button class="connect-btn http-btn" onclick="connectHTTP('http://10.101.104.10:7001/MagicInfo/login')">
+        <i class="fas fa-globe"></i> Open in Browser
+    </button>
+</div>
+
+<div class="server-card">
+    <i class="fas fa-sync-alt refresh-icon" onclick="checkServerStatus('https://xms.cloud.barco.com/#/home/dashboard-web', 'http', 'HTTP')"></i>
+    <div class="server-name-container">
+        <div class="server-name">Barco XMS</div>
+        <div class="status-container">
+            <div class="status-indicator status-checking" id="icmp-https://xms.cloud.barco.com/#/home/dashboard-web"></div>
+            <span>ICMP</span>
+            <div class="status-indicator status-checking" id="port-https://xms.cloud.barco.com/#/home/dashboard-web-http" style="margin-left: 5px;"></div>
+            <span>HTTP</span>
+        </div>
+    </div>
+    <div class="server-ip">xms.cloud.barco.com</div>
+    <div class="server-owner">Owner: Vignesh B</div>
+    <div class="last-checked" id="last-checked-10.101.104.10-web"></div>
+    <button class="connect-btn http-btn" onclick="connectHTTP('https://xms.cloud.barco.com/#/home/dashboard')">
+        <i class="fas fa-globe"></i> Open in Browser
+    </button>
+</div>
+				
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // List of all servers to check on page load
+        const serversToCheck = [
+            { host: '10.101.104.10', portType: 'rdp', displayName: 'RDP' },
+            { host: '10.101.10.11', portType: 'rdp', displayName: 'RDP' },
+			{ host: '10.101.101.25', portType: 'rdp', displayName: 'RDP' },
+            { host: '10.20.20.4', portType: 'rdp', displayName: 'RDP' },
+            { host: '10.101.10.1', portType: 'ssh', displayName: 'SSH' },
+            { host: '10.101.10.10', portType: 'ssh', displayName: 'SSH' },
+            { host: '10.101.10.21', portType: 'ssh', displayName: 'SSH' },
+            { host: '10.101.10.31', portType: 'ssh', displayName: 'SSH' },
+            { host: 'blr1.mathco.com', isWeb: true },
+            { host: '10.101.10.10-web', portType: 'https', displayName: 'HTTPS' }
+        ];
+
+        // Initialize all servers with "checking" status and check them
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set all status indicators to "checking" state initially
+            const statusIndicators = document.querySelectorAll('.status-indicator');
+            statusIndicators.forEach(indicator => {
+                indicator.className = 'status-indicator status-checking';
+            });
+
+            // Check network status
+            checkNetworkStatus();
+
+            // Check all servers with staggered delays to avoid overwhelming
+            serversToCheck.forEach((server, index) => {
+                setTimeout(() => {
+                    if (server.isWeb) {
+                        checkWebServerStatus(server.host);
+                    } else {
+                        checkServerStatus(server.host, server.portType, server.displayName);
+                    }
+                }, index * 300); // Stagger checks by 300ms
+            });
+        });
+
+        // Office network IPs
+        const officeNetworks = [
+            '14.142.183.126', // Tata
+            '125.21.77.222',  // Airtel
+            '49.204.94.93'    // ACT
+        ];
+
+        async function checkNetworkStatus() {
+            const statusElement = document.getElementById('network-status');
+            const ipElement = document.getElementById('current-ip');
+            
+            statusElement.textContent = "Checking network...";
+            
+            try {
+                // Get public IP
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                const currentIp = data.ip;
+                
+                ipElement.textContent = `Your IP: ${currentIp}`;
+                
+                // Check if IP is in office networks
+                const isOfficeNetwork = officeNetworks.includes(currentIp);
+                
+                if (isOfficeNetwork) {
+                    let provider = '';
+                    if (currentIp === '14.142.183.126') provider = 'Tata';
+                    else if (currentIp === '125.21.77.222') provider = 'Airtel';
+                    else if (currentIp === '49.204.94.93') provider = 'ACT';
+                    
+                    statusElement.innerHTML = `<span class="office-network">You are on office network (${provider})</span>`;
+                } else {
+                    statusElement.innerHTML = '<span class="non-office-network">You are not on office network</span>';
+                }
+            } catch (error) {
+                console.error("Error checking network status:", error);
+                statusElement.textContent = "Unable to determine network status";
+                ipElement.textContent = "";
+            }
+        }
+
+        function updateLastChecked(host) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            const elements = document.querySelectorAll(`[id^="last-checked-${host}"]`);
+            elements.forEach(el => {
+                el.textContent = `Last checked: ${timeString}`;
+            });
+        }
+
+        function checkServerStatus(host, portType, displayName) {
+            // Show checking status
+            updateStatus(`icmp-${host}`, null);
+            updateStatus(`port-${host}-${portType}`, null);
+            
+            // Simulate network delay (500ms - 1500ms)
+            const delay = 500 + Math.random() * 1000;
+            
+            setTimeout(() => {
+                // Simulate ICMP ping (80% success rate)
+                const icmpAvailable = Math.random() > 0.2;
+                updateStatus(`icmp-${host}`, icmpAvailable);
+                
+                // Determine actual port number based on type
+                let portNumber;
+                switch(portType) {
+                    case 'rdp': portNumber = 3389; break;
+                    case 'ssh': portNumber = 22; break;
+                    case 'https': portNumber = 443; break;
+                    default: portNumber = 0;
+                }
+                
+                // Simulate port check (90% success if ICMP succeeds)
+                const portAvailable = icmpAvailable && Math.random() > 0.1;
+                updateStatus(`port-${host}-${portType}`, portAvailable);
+                
+                updateLastChecked(host);
+            }, delay);
+        }
+
+        function checkWebServerStatus(host) {
+            // Show checking status
+            updateStatus(`icmp-${host}`, null);
+            updateStatus(`port-${host}-https`, null);
+            
+            // Simulate network delay (500ms - 1500ms)
+            const delay = 500 + Math.random() * 1000;
+            
+            setTimeout(() => {
+                // Simulate ICMP ping (80% success rate)
+                const icmpAvailable = Math.random() > 0.2;
+                updateStatus(`icmp-${host}`, icmpAvailable);
+                
+                if (icmpAvailable) {
+                    // Simulate HTTPS (443) check (90% success)
+                    const httpsAvailable = Math.random() > 0.1;
+                    updateStatus(`port-${host}-https`, httpsAvailable);
+                } else {
+                    // If ICMP fails, mark port as unavailable
+                    updateStatus(`port-${host}-https`, false);
+                }
+                
+                updateLastChecked(host);
+            }, delay);
+        }
+
+        function updateStatus(elementId, isAvailable) {
+            const indicator = document.getElementById(elementId);
+            if (indicator) {
+                if (isAvailable === null) {
+                    // Checking state
+                    indicator.className = 'status-indicator status-checking';
+                } else {
+                    // Available/unavailable state
+                    indicator.className = isAvailable ? 
+                        'status-indicator status-available' : 
+                        'status-indicator status-unavailable';
+                }
+            }
+        }
+
+		  
+		  // Function to connect via RDP
+        function connectRDP(ip) {
+            // Check if the browser supports msLaunchUri (Microsoft Edge)
+            if (navigator.msLaunchUri) {
+                navigator.msLaunchUri("ms-rd://full%20address=s:" + ip, 
+                    () => console.log("RDP launched via Edge protocol"),
+                    () => tryStandardRDP(ip)
+                );
+                return;
+            }
+            
+            // Fallback to standard RDP protocol
+            tryStandardRDP(ip);
+        }
+
+        function tryStandardRDP(ip) {
+            try {
+                window.location.href = "rdp://full%20address=s:" + ip;
+            } catch(e) {
+                console.log("RDP connection failed", e);
+                alert("RDP connection failed. Please check your browser settings.");
+            }
+        }
+		  
+        // SSH connection function
+        function connectSSH(ip) {
+            // Try standard SSH protocol (won't show popup if successful)
+            try {
+                window.location.href = "ssh://" + ip;
+            } catch(e) {
+                console.log("SSH connection failed");
+            }
+        }
+
+       
+       // HTTP connection function - modified to handle complete URLs
+function connectHTTP(url) {
+    try {
+        // Ensure the URL is properly formatted
+        let fullUrl = url;
+        
+        // If the URL doesn't start with http:// or https://, add http://
+        if (!/^https?:\/\//i.test(url)) {
+            fullUrl = 'http://' + url;
+        }
+        
+        // Open in new tab
+        const newTab = window.open(fullUrl, '_blank');
+        
+        // If tab was blocked or failed
+        if (!newTab || newTab.closed || typeof newTab.closed == 'undefined') {
+            alert("Popup blocked. Please allow popups for this site or manually visit:\n" + fullUrl);
+        }
+    } catch(e) {
+        console.log("HTTP connection failed", e);
+        alert("Connection failed. Please check your network settings.");
+    }
+}
+
+        // Special function for firewall connection with fallback
+        function tryFirewallConnection() {
+            try {
+                const primaryUrl = 'https://blr1.mathco.com';
+                const fallbackUrl = 'https://blr2.mathco.com';
+                
+                // Try primary URL first
+                const newTab = window.open(primaryUrl, '_blank');
+                
+                // Check if tab was blocked or failed
+                if (!newTab || newTab.closed || typeof newTab.closed == 'undefined') {
+                    // Try fallback URL
+                    window.open(fallbackUrl, '_blank');
+                }
+            } catch(e) {
+                console.log("Firewall connection failed");
+            }
+        }
+    </script>
+</body>
+</html>
