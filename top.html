@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Dashboard</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --text-light: #ffffff;
+            --background-light: #f8fafc;
+        }
+        
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background-color: var(--background-light);
+        }
+        
+        .header-container {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 2rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            height: 50px;
+            margin-right: 1.5rem;
+        }
+        
+        .title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-container {
+            background-color: var(--secondary-color);
+        }
+        
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .nav-item {
+            padding: 1rem 2rem;
+            position: relative;
+        }
+        
+        .nav-item a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.2s ease;
+        }
+        
+        .nav-item a:hover {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 3px;
+            background-color: var(--text-light);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-item:hover::after {
+            width: 60%;
+        }
+        
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            .logo {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+            
+            .nav-menu {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-item {
+                padding: 0.75rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <img src="logo.jpg" alt="Company Logo" class="logo">
+        <h1 class="title"><center> IT Dashboard </center></h1>
+    </div>
+    
+    <nav class="nav-container">
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="main.html" target="mainFrame">About Team</a></li>
+            <li class="nav-item"><a href="#">Org Structure</a></li>
+            <li class="nav-item"><a href="#">Architecture</a></li>
+            <li class="nav-item"><a href="controls.html" target="mainFrame">Controls</a></li>
+            <li class="nav-item"><a href="#">Inventory</a></li>
+            <li class="nav-item"><a href="#">Reports</a></li>
+            <li class="nav-item"><a href="#">Backup</a></li>
+            <li class="nav-item"><a href="adminconsole.html" target="mainFrame">Admin Console</a></li>
+        </ul>
+    </nav>
+</body>
+</html>
